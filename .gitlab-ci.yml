@@ -1,0 +1,2 @@
+include:
+  - component: ${CI_SERVER_FQDN}/cicd/components/general/autoload@$DP_CI_GENERAL_COMPONENTS_VERSION

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hackathon-app
+  labels:
+    app.kubernetes.io/name: hackathon-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hackathon-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hackathon-app
+    spec:
+      serviceAccountName: hackathon-app
+      imagePullSecrets:
+        - name: gitlab-registry
+      containers:
+        - name: app
+          image: example.com:443/cicd/hackathon/m.ferdosi/master:217917-9203242a
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: hackathon-app-config
+            - secretRef:
+                name: hackathon-app-secret
+          startupProbe:
+            httpGet:
+              path: /live
+              port: http
+            periodSeconds: 5
+            failureThreshold: 18
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: hackathon-app
+version: 0.1.0
+dependencies:
+  - name: app-chart
+    version: 2.6.2
+    repository: https://example.com/api/v4/projects/592/packages/helm/stable

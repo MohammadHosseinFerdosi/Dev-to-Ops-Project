@@ -1,0 +1,75 @@
+﻿app-chart:
+  image:
+    # Secret auth is keyed to example.com:443 (not bare host)
+    registry: ""
+    repository: example.com:443/cicd/hackathon/m.ferdosi/master
+    tag: "217917-9203242a"
+    pullPolicy: IfNotPresent
+
+  imagePullSecrets:
+    - name: gitlab-registry
+
+  env:
+    - name: REQUEST_THRESHOLD
+      value: "3"
+    - name: NOT_READY_SECONDS
+      value: "30"
+    - name: STARTUP_DELAY_SECONDS
+      value: "40"
+    - name: PARTICIPANT
+      value: "m.ferdosi"
+    - name: CENTRAL_SERVICE_URL
+      value: "http://radar-hackathon-platform.radar.svc.hackathon-cluster.local/checkin"
+    - name: APP_SECRET
+      value: "dummy-value-for-hackathon"
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+    actuatorPort: 8081
+    actuatorTargetPort: 9090
+
+  startup:
+    enabled: true
+    startupProbe:
+      httpGet:
+        path: /live
+        port: 8080
+      periodSeconds: 5
+      failureThreshold: 18
+
+  liveness:
+    enabled: true
+    livenessProbe:
+      httpGet:
+        path: /live
+        port: 8080
+      periodSeconds: 10
+      failureThreshold: 3
+
+  readiness:
+    enabled: true
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+      periodSeconds: 5
+      failureThreshold: 1
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+  serviceMonitor:
+    enabled: false
+
+  # PodSecurity baseline forbids hostPath timezone mounts from chart defaults
+  volumes:
+    enabled: false
+  volumeMounts:
+    enabled: false
